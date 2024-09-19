@@ -10,7 +10,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.Url;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -95,7 +94,7 @@ public class JsonFile {
 
     public Url getExternalUrl() {
         try {
-            return new MyUrl(new URL(url));
+            return new MyUrl(url);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -141,14 +140,10 @@ public class JsonFile {
 //        lfs.refresh(true);
         return ApplicationManager.getApplication()
                 .runReadAction((ThrowableComputable<VirtualFile, RuntimeException>) () -> {
-//                    this.afterLoadAction();
                     return lfs.findFileByPath(this.getLocalPath());
                 });
     }
 
-    public void afterLoadAction() {
-        return;
-    }
 
     public List<JsonFile> getChildren() {
         return this.children;

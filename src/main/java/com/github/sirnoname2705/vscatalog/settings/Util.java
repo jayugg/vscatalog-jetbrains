@@ -1,8 +1,9 @@
 package com.github.sirnoname2705.vscatalog.settings;
 
 import java.io.File;
+import java.util.Objects;
 
-public class Util {
+public final class Util {
 
     public static final String DEFAULT_URL_PROTOCOL = "https";
     public static final String DEFAULT_URL_AUTHORITY = "raw.githubusercontent.com";
@@ -20,12 +21,15 @@ public class Util {
 //            "https://raw.githubusercontent.com/SirNoName2705/VintelliSchemas/master/SchemaReleases/current/" +
 //                    CATALOG_FILE_NAME;
     public static final String LOCAL_BASE =
-            com.intellij.openapi.application.PathManager.getConfigPath() + File.pathSeparator + "vscatalog" +
-                    File.pathSeparator;
+            com.intellij.openapi.application.PathManager.getConfigPath() + File.separator + "vscatalog" +
+                    File.separator;
     public static final String SCHEMA_VERSION_PATTERN_STRING = "\"\\{\\s*\\\"\\$schema\\\":\\s*\\\"(.*)\\\"\"";
     public static final String refPattern = ".*\\\"\\$ref\\\".*\\\"(.*)\\\"";
     public static String SOURCE_URL;
     public static String LOCAL_SOURCE;
+
+    private Util() {
+    }
 
     public static String translateUrlToLocalPath(String url) {
         return url.replace(getSourceUrl(), getLocalUrl());
@@ -50,7 +54,7 @@ public class Util {
     }
 
     public static boolean isAutoUpdate() {
-        return com.github.sirnoname2705.vscatalog.settings.AppSettings.getInstance().getState().autoUpdateOnStartup;
+        return Objects.requireNonNull(AppSettings.getInstance().getState()).autoUpdateOnStartup;
     }
 
 }

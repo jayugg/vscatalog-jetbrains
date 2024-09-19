@@ -1,5 +1,6 @@
 package com.github.sirnoname2705.vscatalog.remote;
 
+import com.github.sirnoname2705.vscatalog.settings.Util;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.Url;
 import com.intellij.util.Urls;
@@ -8,7 +9,6 @@ import com.intellij.util.io.URLUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URL;
 import java.util.Map;
 
 public class MyUrl implements Url {
@@ -21,10 +21,6 @@ public class MyUrl implements Url {
     private String externalForm;
     private MyUrl withoutParameters;
 
-    MyUrl(@Nullable String scheme, @Nullable String authority, @Nullable String path) {
-        this(scheme, authority, path, null);
-    }
-
     MyUrl(@Nullable String scheme, @Nullable String authority, @Nullable String path, @Nullable String parameters) {
         this.scheme = scheme;
         this.authority = authority;
@@ -32,8 +28,16 @@ public class MyUrl implements Url {
         this.parameters = StringUtil.nullize(parameters);
     }
 
-    public MyUrl(@NotNull URL url) {
-        this("https", url.getAuthority(), url.getPath());
+    public MyUrl(@NotNull String url) {
+        scheme = Util.DEFAULT_URL_PROTOCOL;
+        authority = Util.DEFAULT_URL_AUTHORITY;
+        parameters = null;
+        path = getPathFromString(url);
+    }
+
+    private static String getPathFromString(String url) {
+        var split = url.split(Util.DEFAULT_URL_AUTHORITY);
+        return split[1];
     }
 
 
