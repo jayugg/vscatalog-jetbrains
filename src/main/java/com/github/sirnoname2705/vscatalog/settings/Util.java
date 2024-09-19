@@ -1,5 +1,7 @@
 package com.github.sirnoname2705.vscatalog.settings;
 
+import java.io.File;
+
 public class Util {
 
     public static final String DEFAULT_URL_PROTOCOL = "https";
@@ -13,12 +15,13 @@ public class Util {
     );
     public static final String CATALOG_FILE_NAME = "vs_schema_catalog.json";
 
-    public static final String CATALOG_URL = URL_BASE + "/" + CATALOG_FILE_NAME;
-    public static final String NEWEST_CATALOG =
-            "https://raw.githubusercontent.com/SirNoName2705/VintelliSchemas/master/SchemaReleases/current/" +
-                    CATALOG_FILE_NAME;
+    //    public static final String CATALOG_URL = URL_BASE + "/" + CATALOG_FILE_NAME;
+//    public static final String NEWEST_CATALOG =
+//            "https://raw.githubusercontent.com/SirNoName2705/VintelliSchemas/master/SchemaReleases/current/" +
+//                    CATALOG_FILE_NAME;
     public static final String LOCAL_BASE =
-            com.intellij.openapi.application.PathManager.getConfigPath() + "/vscatalog/";
+            com.intellij.openapi.application.PathManager.getConfigPath() + File.pathSeparator + "vscatalog" +
+                    File.pathSeparator;
     public static final String SCHEMA_VERSION_PATTERN_STRING = "\"\\{\\s*\\\"\\$schema\\\":\\s*\\\"(.*)\\\"\"";
     public static final String refPattern = ".*\\\"\\$ref\\\".*\\\"(.*)\\\"";
     public static String SOURCE_URL;
