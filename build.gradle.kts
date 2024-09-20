@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.sirnoname2705"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -15,10 +15,10 @@ repositories {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2023.2.6")
-    type.set("IC") // Target IDE Platform
+    type.set("RD") // Target IDE Platform
+    version.set("2024.2")
 
-    plugins.set(listOf(/* Plugin Dependencies */))
+//    plugins.set(listOf(/* Plugin Dependencies */))
 }
 
 tasks {

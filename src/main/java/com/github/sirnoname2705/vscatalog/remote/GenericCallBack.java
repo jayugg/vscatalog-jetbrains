@@ -2,7 +2,6 @@ package com.github.sirnoname2705.vscatalog.remote;
 
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.vfs.impl.http.RemoteContentProvider;
-import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
