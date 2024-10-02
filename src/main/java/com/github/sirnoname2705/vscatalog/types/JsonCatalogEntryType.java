@@ -67,6 +67,10 @@ public class JsonCatalogEntryType {
         return new SchemaFile(url, name, description, fileMatch);
     }
 
+    public SchemaFile toSchemaFile(boolean autoDownload) {
+        return new SchemaFile(url, name, description, fileMatch, autoDownload);
+    }
+
     @Override
     public String toString() {
         return "JsonCatalogEntryType{" +

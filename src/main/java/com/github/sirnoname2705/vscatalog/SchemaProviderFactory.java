@@ -1,5 +1,6 @@
 package com.github.sirnoname2705.vscatalog;
 
+import com.github.sirnoname2705.vscatalog.model.JsonFileManager;
 import com.intellij.openapi.project.Project;
 import com.jetbrains.jsonSchema.extension.JsonSchemaFileProvider;
 import com.jetbrains.jsonSchema.extension.JsonSchemaProviderFactory;
@@ -41,7 +42,7 @@ public class SchemaProviderFactory implements JsonSchemaProviderFactory {
         }
         if (SHOULD_INIT) {
             com.intellij.openapi.application.ApplicationManager.getApplication()
-                    .executeOnPooledThread(pluginInitializer::initializePlugin);
+                    .executeOnPooledThread(pluginInitializer::initializePluginV2);
 //            ProcessIOExecutorService.INSTANCE.execute(pluginInitializer::initializedPlugin);
             SHOULD_INIT = false;
         }
@@ -70,7 +71,9 @@ public class SchemaProviderFactory implements JsonSchemaProviderFactory {
         IS_READY = false;
         SHOULD_INIT = true;
         DependencyResolver.clearDependencyCache();
+        JsonFileManager.getInstance().clearCache();
         resetSchemaService();
+
     }
 
 

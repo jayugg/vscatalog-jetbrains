@@ -25,6 +25,7 @@ public final class Util {
                     File.separator;
     public static final String SCHEMA_VERSION_PATTERN_STRING = "\"\\{\\s*\\\"\\$schema\\\":\\s*\\\"(.*)\\\"\"";
     public static final String refPattern = ".*\\\"\\$ref\\\".*\\\"(.*)\\\"";
+    public static final String urlPattern = ".*\"url\".*\"(.*)\"";
     public static String SOURCE_URL;
     public static String LOCAL_SOURCE;
 

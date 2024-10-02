@@ -1,8 +1,10 @@
 package com.github.sirnoname2705.vscatalog.model;
 
+import com.github.sirnoname2705.vscatalog.DependencyResolver;
 import com.github.sirnoname2705.vscatalog.PluginInitializer;
 import com.github.sirnoname2705.vscatalog.remote.DownloadHelper;
 import com.github.sirnoname2705.vscatalog.remote.MyUrl;
+import com.github.sirnoname2705.vscatalog.types.UniqueStack;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.util.ThrowableComputable;
 import com.intellij.openapi.vfs.LocalFileSystem;
@@ -38,10 +40,10 @@ public class JsonFile {
         }
     }
 
-    public JsonFile(String url, boolean downloadJson) {
+    public JsonFile(String url, boolean autoDownloadJson) {
         this.url = url;
         this.children = new ArrayList<>(5);
-        if (downloadJson) {
+        if (autoDownloadJson) {
             this.downloadJsonSync();
         }
     }
@@ -51,19 +53,34 @@ public class JsonFile {
 
     }
 
+    public static JsonFile FromLocalPath(String url, Path localPath) {
+        JsonFile jsonFile = new JsonFile(url, false);
+        jsonFile.localPath = localPath.toString();
+        jsonFile.isFileDownloaded = true;
+        jsonFile.virtualFile = jsonFile.getLocalFileFromDisk();
+        return jsonFile;
+    }
+
     public VirtualFile getVirtualFile() {
         if (virtualFile != null) {
             return virtualFile;
         }
-
         if (isPresentOnDisk()) {
             VirtualFile localFile = getLocalFileFromDisk();
             this.virtualFile = localFile;
             this.isFileDownloaded = true;
             return virtualFile;
+        } else {
+//            LocalFileSystem.getInstance().refresh(false);
+            this.downloadJsonSync();
+            this.downloadStarted = true;
+            this.virtualFile = getLocalFileFromDisk();
+            this.isFileDownloaded = true;
+            if (this.virtualFile == null) {
+                System.err.println("Virtual file is null");
+            }
+            return virtualFile;
         }
-
-        return virtualFile;
     }
 
     public void downloadJson() {
@@ -82,7 +99,6 @@ public class JsonFile {
         this.ensureDirExists();
         PluginInitializer.contentProvider.saveContentSync(getExternalUrl(), getLocalPath());
         this.afterDownloadAction();
-//        PluginInitializer.contentProvider.saveContent(this.url, getLocalPath(), this::afterDownloadAction);
         downloadStarted = true;
     }
 
@@ -111,10 +127,12 @@ public class JsonFile {
     public String getContent() {
         if (this.content == null || this.dirty) {
             try {
-                if (this.getVirtualFile() != null) {
+                var virtualFile = this.getVirtualFile();
+                if (virtualFile != null) {
                     this.content = new String(virtualFile.contentsToByteArray());
                 } else {
-                    return null;
+                    System.err.println("Virtual file is null");
+                    return "";
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -149,8 +167,77 @@ public class JsonFile {
         return this.children;
     }
 
+    public void findChildren() {
+        if (this.children == null) {
+            this.children = new ArrayList<>(5);
+        }
+        var content = this.getContent();
+        assert content != null;
+        var localPaths = DependencyResolver.getRefValues(content);
+        for (String path : localPaths) {
+            if (path.startsWith("#")) {
+                continue;
+            }
+            var url = DependencyResolver.resolveUrl(this.url, path);
+            if (url.isBlank()) {
+                continue;
+            }
+            if (url.endsWith("#")) {
+                url = url.replace("#", "");
+            }
+            JsonFile jsonFile = new JsonFile(url, false);
+            this.addChildren(jsonFile);
+        }
+    }
+
     public void addChildren(JsonFile jsonFile) {
         this.children.add(jsonFile);
+    }
+
+    public boolean isAncestryReady() {
+        if (!isPresentOnDisk()) {
+            return false;
+        }
+        if (getVirtualFile() == null) {
+            return false;
+        }
+
+        for (JsonFile child : getWholeAncestry().toArray()) {
+            if (!child.isPresentOnDisk()) {
+                return false;
+            }
+            if (child.getVirtualFile() == null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public UniqueStack<JsonFile> getWholeAncestry() {
+        UniqueStack<JsonFile> ancestry = new UniqueStack<>();
+        JsonFile current = this;
+        for (JsonFile child : current.children) {
+            ancestry.merge(child.getWholeAncestry());
+        }
+
+        return ancestry;
+    }
+
+    public boolean isReadyIterative() {
+        UniqueStack<JsonFile> stack = new UniqueStack<>();
+        stack.push(this);
+        while (!stack.isEmpty()) {
+            JsonFile current = stack.pop();
+            if (!current.isPresentOnDisk()) {
+                return false;
+            }
+            if (current.getVirtualFile() == null) {
+                return false;
+            }
+            stack.pushAll(current.children);
+        }
+        return true;
     }
 
     public boolean isReady() {
@@ -166,5 +253,16 @@ public class JsonFile {
             }
         }
         return true;
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof JsonFile)) {
+            return false;
+        }
+        JsonFile other = (JsonFile) obj;
+        return this.url.equals(other.url);
     }
 }

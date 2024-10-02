@@ -40,6 +40,14 @@ public class SchemaFile extends JsonFile implements JsonSchemaFileProvider {
         addAllFileMatches(fileMatch);
     }
 
+    public SchemaFile(String url, String name, String description, List<String> fileMatch, boolean autoDownload) {
+        super(url, autoDownload);
+        this.name = name;
+        this.description = description;
+        addAllFileMatches(fileMatch);
+    }
+
+
     // This is kind of stupid and need refactoring
     private VirtualFile LoadOrFetchFile() {
         return this.getVirtualFile();
@@ -144,6 +152,15 @@ public class SchemaFile extends JsonFile implements JsonSchemaFileProvider {
     @Override
     public @Nullable @NonNls String getRemoteSource() {
         return this.url;
+    }
+
+    @Override
+    public String toString() {
+        return "SchemaFile{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", fileMatch=" + fileMatch +
+                '}';
     }
 
 }

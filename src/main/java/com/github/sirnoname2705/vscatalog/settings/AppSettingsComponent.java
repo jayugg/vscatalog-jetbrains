@@ -20,9 +20,9 @@ public class AppSettingsComponent {
 
     public AppSettingsComponent() {
         // Define the versions for the combo box
-        String[] versions = {"current"};
+        String[] versions = {"current", "v1.0", "v1.1", "testing"};
         versionComboBox = new ComboBox<String>(versions);
-        checkForUpdatesButton.addActionListener(e -> com.github.sirnoname2705.vscatalog.Updater.updateNow());
+        checkForUpdatesButton.addActionListener(e -> com.github.sirnoname2705.vscatalog.Updater.forceUpdate());
 
         myMainPanel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(new JBLabel("Select Version: "), versionComboBox, 1, false)

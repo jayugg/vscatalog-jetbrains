@@ -1,6 +1,7 @@
 package com.github.sirnoname2705.vscatalog;
 
 import com.github.sirnoname2705.vscatalog.model.JsonCatalog;
+import com.github.sirnoname2705.vscatalog.model.JsonFileManager;
 import com.github.sirnoname2705.vscatalog.remote.DownloadHelper;
 import com.intellij.openapi.vfs.impl.http.RemoteFileManager;
 
@@ -27,6 +28,19 @@ public class PluginInitializer {
         }
         if (catalog.isReady()) {
             SchemaProviderFactory.providers = catalog.GetFileProviders();
+            SchemaProviderFactory.setJsonSchemasReady();
+        }
+        if (isAutoUpdate()) {
+            Updater.updateIfAvailable();
+        }
+    }
+
+    public void initializePluginV2() {
+        catalog = new JsonCatalog(getCatalogUrl());
+        JsonFileManager.getInstance().fillFromCatalog(catalog);
+
+        if (catalog.isReadyIterative()) {
+            SchemaProviderFactory.providers = catalog.GetEmptyFileProviders();
             SchemaProviderFactory.setJsonSchemasReady();
         }
         if (isAutoUpdate()) {

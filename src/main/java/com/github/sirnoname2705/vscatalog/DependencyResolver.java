@@ -2,9 +2,9 @@ package com.github.sirnoname2705.vscatalog;
 
 import com.github.sirnoname2705.vscatalog.model.JsonFile;
 import com.github.sirnoname2705.vscatalog.model.SchemaFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,37 +22,41 @@ public final class DependencyResolver {
     }
 
     public static void resolveAndDownloadUrls(SchemaFile schema) {
-        try {
-            String fileContent = schema.getContent();
-            var paths = getRefValues(fileContent);
-            var baseUrl = schema.url;
-            List<String> urls = new ArrayList<>(paths.size());
-            for (String path : paths) {
-                if (path.startsWith("#")) {
-                    continue;
-                }
-                String url;
-                url = resolveUrl(baseUrl, path);
-                if (url.endsWith("#")) {
-                    url = url.replace("#", "");
-                }
-                if (alreadyDownloaded.contains(url)) {
-                    continue;
-                }
-                urls.add(url);
-                JsonFile jsonFile = new JsonFile(url);
-                jsonFile.downloadJson();
+        String fileContent = schema.getContent();
+        var paths = getRefValues(fileContent);
+        var baseUrl = schema.url;
+        List<String> urls = new ArrayList<>(paths.size());
+        for (String path : paths) {
+            if (path.startsWith("#")) {
+                continue;
             }
-            alreadyDownloaded.addAll(urls);
-
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            String url;
+            url = resolveUrl(baseUrl, path);
+            if (url.isBlank()) {
+                continue;
+            }
+            if (url.endsWith("#")) {
+                url = url.replace("#", "");
+            }
+            if (alreadyDownloaded.contains(url)) {
+                continue;
+            }
+            urls.add(url);
+            JsonFile jsonFile = new JsonFile(url);
+            jsonFile.downloadJsonSync();
         }
+        alreadyDownloaded.addAll(urls);
+
+
     }
 
-    public static List<String> getRefValues(String jsonString) {
+
+    public static List<String> getRefValues(@NotNull String jsonString) {
         List<String> results = new ArrayList<>();
         Matcher matcher = pattern.matcher(jsonString);
+        if (!matcher.find()) {
+            return results;
+        }
         while (matcher.find()) {
             var result = matcher.group(1);
             results.add(result);
@@ -60,10 +64,15 @@ public final class DependencyResolver {
         return results;
     }
 
-    public static String resolveUrl(String baseUrl, String relativePath) throws URISyntaxException {
-        URI baseUri = new URI(baseUrl);
-        URI resolvedUri = baseUri.resolve(relativePath);
-        return resolvedUri.toString();
+    public static String resolveUrl(String baseUrl, String relativePath) {
+        try {
+            URI baseUri = new URI(baseUrl);
+            URI resolvedUri = baseUri.resolve(relativePath);
+            return resolvedUri.toString();
+        } catch (Exception e) {
+            System.err.println("Error resolving url: " + e.getMessage());
+            return "";
+        }
     }
 
     public static void clearDependencyCache() {

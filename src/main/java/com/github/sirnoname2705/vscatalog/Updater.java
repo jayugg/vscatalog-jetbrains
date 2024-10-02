@@ -1,7 +1,9 @@
 package com.github.sirnoname2705.vscatalog;
 
 import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import static com.github.sirnoname2705.vscatalog.SchemaProviderFactory.resetSchemaService;
 import static com.github.sirnoname2705.vscatalog.SchemaProviderFactory.restartPlugin;
@@ -11,9 +13,13 @@ public class Updater {
 
     public static void updateIfAvailable() {
         if (isUpdateAvailable()) {
-            updateNow();
+            updateNowV2();
         }
 
+    }
+
+    public static void forceUpdate() {
+        updateNowV2();
     }
 
 
@@ -51,6 +57,21 @@ public class Updater {
             });
 
         } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+        restartPlugin();
+    }
+
+    public static void updateNowV2() {
+        com.github.sirnoname2705.vscatalog.SchemaProviderFactory.IS_READY = false;
+        com.github.sirnoname2705.vscatalog.SchemaProviderFactory.SHOULD_INIT = false;
+        resetSchemaService();
+        var currentFilePath = java.nio.file.Path.of(getLocalUrl());
+        try {
+            Files.move(currentFilePath, Path.of(currentFilePath.toString() + "_old"),
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (java.io.IOException e) {
+            System.err.println("Error while renaming the current directory" + currentFilePath.toString());
             e.printStackTrace();
         }
         restartPlugin();
